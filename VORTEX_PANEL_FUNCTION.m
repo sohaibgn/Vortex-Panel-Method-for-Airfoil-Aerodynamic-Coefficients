@@ -5,11 +5,11 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
     angle_of_attack = (angle_of_attack * pi) /180; % Convert to radians
 
     %% Coordinates (x,y) of control point and panel length S are computed for each of the vortex panels
-    for i = 1:M 
+    for i = 1:M
         ip = i + 1; % Next i
         x(i) = 0.5 * (Xb(i) + Xb(ip));
         y(i) = 0.5 * (Yb(i) + Yb(ip));
-        s(i) = sqrt((Xb(ip) - Xb(i))^2 + (Yb(ip) - Yb(i))^2); 
+        s(i) = sqrt((Xb(ip) - Xb(i))^2 + (Yb(ip) - Yb(i))^2);
 
         theta(i) = atan2((Yb(ip) - Yb(i)), (Xb(ip) - Xb(i))); % Calculate theta
         sine(i) = sin(theta(i)); % Calculate sine(theta)
@@ -24,7 +24,7 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
                 CT1(i, j) = 0.5 * pi;
                 CT2(i, j) = 0.5 * pi;
             else
-                % Calculate the geometric constants 
+                % Calculate the geometric constants
                 A = -(x(i) - Xb(j)) * cosine(j) - (y(i) - Yb(j)) * sine(j);
                 B = (x(i) - Xb(j))^2 + (y(i) - Yb(j))^2;
                 C = sin(theta(i) - theta(j));
@@ -41,8 +41,8 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
             end
         end
     end
-    
-    %% Compute Influence Coefficients 
+
+    %% Compute Influence Coefficients
     for i = 1:M
        AN(i, 1)  = CN1(i, 1);
        AN(i, Mp) = CN2(i, M);
@@ -61,7 +61,7 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
     RHS(Mp) = 0.0;
 
     %% Solve the Linear System
-    Gama = inv(AN) * (RHS'); % Same as multiplying by the inverse (X = inv(A)*B)    
+    Gama = inv(AN) * (RHS'); % Same as multiplying by the inverse (X = inv(A)*B)
     for i = 1:M
         V(i) = cos(theta(i) - angle_of_attack); % Tangential velocity
         for j = 1:Mp
@@ -69,10 +69,10 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
            CP(i) = 1.0 - V(i)^2; % Calculate the coeff. of pressure
         end
     end
-    
+
     %% Calculate the Circulation
     Circ = sum(V .* s);
-    
+
     %% Calculate the Sectional Coefficient of Lift
     %c = abs(max(Xb) - min(Xb)); % Estimate the chord, based on x
     %c_l = (2 * Circ) / (c); % Calculate the sectional coefficient of lift using Circulation
@@ -84,14 +84,14 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
     end
     cy = cy/c;
     cx = cx/c;
-    c_d  =  (cx) * (cos(angle_of_attack)) + (cy) * (sin(angle_of_attack)); 
+    c_d  =  (cx) * (cos(angle_of_attack)) + (cy) * (sin(angle_of_attack));
     c_l  = -(cx) * (sin(angle_of_attack)) + (cy) * (cos(angle_of_attack));
-    
+
     %% Summation of all Vortices
     Gama(89) = [];
     name_3 = ['The sum of all vortices is equal ', num2str(dot(Gama,s))];
     disp(name_3)
-    
+
     %% Plot the streamlines
     [x_1, y_1] = meshgrid(-0.5:0.002:1.5, -0.5:0.001:0.5);
     psi = zeros(1001, 1001);
@@ -118,7 +118,7 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
     grid on
     axis image
     cleanfigure;
-    
+
     %% Plot the coefficient of pressure Graph for the airfoil
     figure;
     plot(x./c, CP)
@@ -130,5 +130,5 @@ function [c_l, c_d, V, s] = VORTEX_PANEL_FUNCTION(Xb, Yb, Vinf, c, angle_of_atta
     ylabel('C_{p}')
     grid on
     cleanfigure;
-    
+
 end
